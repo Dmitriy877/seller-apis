@@ -12,7 +12,28 @@ logger = logging.getLogger(__file__)
 
 
 def get_product_list(last_id, client_id, seller_token):
-    """Получить список товаров магазина озон"""
+    """Получить список товаров магазина озон
+
+    Args:
+
+    last_id (str): id товара
+    client_id (str): id клиента
+    seller_token(str): Токен продавца
+
+    Returns:
+
+    list: список товаров
+
+    Example:
+
+    >>> get_product_list(last_id, client_id, seller_token)
+        list
+
+    В случае некорректного указания параметров вызывает ошибку
+    >>> get_product_list(last_id, client_id, seller_token)
+        Error
+    """
+
     url = "https://api-seller.ozon.ru/v2/product/list"
     headers = {
         "Client-Id": client_id,
@@ -32,7 +53,27 @@ def get_product_list(last_id, client_id, seller_token):
 
 
 def get_offer_ids(client_id, seller_token):
-    """Получить артикулы товаров магазина озон"""
+    """Получить артикулы товаров магазина озон
+
+    Args:
+
+    client_id (str): id клиента
+    seller_token(str): Токен продавца
+
+    Returns:
+
+    list: список артикулов
+
+    Example:
+
+    >>> get_offer_ids(client_id, seller_token)
+        list
+
+    В случае некорректного указания параметров вызывает ошибку
+    >>> get_offer_ids(client_id, seller_token)
+        Error
+    """
+
     last_id = ""
     product_list = []
     while True:
@@ -49,7 +90,28 @@ def get_offer_ids(client_id, seller_token):
 
 
 def update_price(prices: list, client_id, seller_token):
-    """Обновить цены товаров"""
+    """Обновить цены товаров
+
+    Args:
+
+    prices(list): список с ценами
+    client_id (str): id клиента
+    seller_token(str): Токен продавца
+
+    Returns:
+
+    json: ответ сервера ОЗОН
+
+    Example:
+
+    >>> update_price(prices: list, client_id, seller_token)
+        json
+
+    В случае некорректного указания параметров возвращает json ответ от севера
+    >>> update_price(prices: list, client_id, seller_token)
+        json
+    """
+
     url = "https://api-seller.ozon.ru/v1/product/import/prices"
     headers = {
         "Client-Id": client_id,
@@ -62,7 +124,28 @@ def update_price(prices: list, client_id, seller_token):
 
 
 def update_stocks(stocks: list, client_id, seller_token):
-    """Обновить остатки"""
+    """Обновить остатки
+
+    Args:
+
+    stocks(list): список с товарами
+    client_id (str): id клиента
+    seller_token(str): Токен продавца
+
+    Returns:
+
+    json: ответ сервера ОЗОН
+
+    Example:
+
+    >>> update_stocks(stocks: list, client_id, seller_token)
+        json
+
+    В случае некорректного указания параметров возвращает json ответ от севера
+    >>> update_stocks(stocks: list, client_id, seller_token)
+        json
+    """
+
     url = "https://api-seller.ozon.ru/v1/product/import/stocks"
     headers = {
         "Client-Id": client_id,
@@ -75,7 +158,17 @@ def update_stocks(stocks: list, client_id, seller_token):
 
 
 def download_stock():
-    """Скачать файл ostatki с сайта casio"""
+    """Скачать файл ostatki с сайта casio
+
+    Returns:
+
+    list:  выгрузка из  excel табллицы с остатками с сайта casio
+
+    Example:
+
+        download_stock()
+        list
+    """
     # Скачать остатки с сайта
     casio_url = "https://timeworld.ru/upload/files/ostatki.zip"
     session = requests.Session()
@@ -97,6 +190,26 @@ def download_stock():
 
 def create_stocks(watch_remnants, offer_ids):
     # Уберем то, что не загружено в seller
+    '''
+    Args:
+
+    watch_remnants(list): выгрузка из excel таблицы с остатками
+    offer_ids(list): спимок артикулов
+
+    Returns:
+
+    list: обновленный список остатков
+
+    Example:
+
+    >>> create_stocks(watch_remnants, offer_ids)
+        list
+
+    В случае некорректного указания параметров возвращает ошибку
+    >>> create_stocks(watch_remnants, offer_ids)
+        Error
+    '''
+
     stocks = []
     for watch in watch_remnants:
         if str(watch.get("Код")) in offer_ids:
@@ -116,6 +229,28 @@ def create_stocks(watch_remnants, offer_ids):
 
 
 def create_prices(watch_remnants, offer_ids):
+    '''
+    Обновление цен
+
+    Args:
+
+    watch_remnants(list): выгрузка из excel таблицы с остатками
+    offer_ids(list): спимок артикулов
+
+    Returns:
+
+    list: обновленный список цен
+
+    Example:
+
+    >>> create_prices(watch_remnants, offer_ids)
+        list
+
+    В случае некорректного указания параметров возвращает ошибку
+    >>> create_prices(watch_remnants, offer_ids)
+        Error
+    '''
+
     prices = []
     for watch in watch_remnants:
         if str(watch.get("Код")) in offer_ids:
@@ -131,17 +266,80 @@ def create_prices(watch_remnants, offer_ids):
 
 
 def price_conversion(price: str) -> str:
-    """Преобразовать цену. Пример: 5'990.00 руб. -> 5990"""
+    """Преобразует цену.
+    Пример: 5'990.00 руб. -> 5990.
+
+    Args:
+
+    price(str): Цена в формате 5'990.00 руб.
+
+    returns:
+
+    str: цена в формате 5990
+
+    Example:
+
+    >>> price_conversion('5'990.00 руб.')
+        '5990'
+
+    В случае ввода некорректного значения возвращает ошибку
+    >>> price_conversion('example')
+        Error
+    """
     return re.sub("[^0-9]", "", price.split(".")[0])
 
 
 def divide(lst: list, n: int):
-    """Разделить список lst на части по n элементов"""
+    """Разделить список lst на части по n элементов
+
+    Args:
+
+    list(lst): Список
+    n(int): число - количество частей на которе разделить список
+
+    returns:
+
+    lst: Список разделенный на n элементов
+
+    Example:
+
+    >>> divide(list, n)
+        list/n
+
+    В случае ввода некорректного значения возвращает ошибку
+    >>> price_conversion([],[])
+        []
+
+    """
     for i in range(0, len(lst), n):
-        yield lst[i : i + n]
+        yield lst[i: i + n]
 
 
 async def upload_prices(watch_remnants, client_id, seller_token):
+    '''
+    Обновляет цены в магазине
+
+    Args:
+
+    client_id (str): id клиента
+    seller_token(str): Токен продавца
+    watch_remnants(list): выгрузка из excel таблицы с остатками
+
+
+    returns:
+
+    lst: актуальный список цен
+
+    Example:
+
+    >>> upload_prices(watch_remnants, client_id, seller_token)
+        list
+
+    В случае ввода некорректного значения возвращает ошибку
+    >>> upload_prices(watch_remnants, client_id, seller_token))
+        Error
+    '''
+
     offer_ids = get_offer_ids(client_id, seller_token)
     prices = create_prices(watch_remnants, offer_ids)
     for some_price in list(divide(prices, 1000)):
@@ -150,6 +348,30 @@ async def upload_prices(watch_remnants, client_id, seller_token):
 
 
 async def upload_stocks(watch_remnants, client_id, seller_token):
+    '''
+    Обновляет остатки
+
+    Args:
+
+    client_id (str): id клиента
+    seller_token(str): Токен продавца
+    watch_remnants(list): выгрузка из excel таблицы с остатками
+
+
+    returns:
+
+    lst: два списка: остатки, заполненные остатки
+
+    example:
+
+    >>> upload_stocks(watch_remnants, client_id, seller_token)
+        list, list
+
+    В случае ввода некорректного значения возвращает ошибку
+    >>> upload_prices(watch_remnants, client_id, seller_token))
+        Error
+    '''
+
     offer_ids = get_offer_ids(client_id, seller_token)
     stocks = create_stocks(watch_remnants, offer_ids)
     for some_stock in list(divide(stocks, 100)):
@@ -159,6 +381,22 @@ async def upload_stocks(watch_remnants, client_id, seller_token):
 
 
 def main():
+    '''
+    Получают Артикулы товаров с платформы Озон
+    Оновляют остатки товаров в магазине
+    Актуализируют цены на товары
+
+    Example:
+
+    >>> main()
+
+    При некорректной работе выдает соответствующую ошибку
+    >>> main()
+    "Превышено время ожидания..."
+    "Ошибка соединения"
+    "ERROR_2"
+
+    '''
     env = Env()
     seller_token = env.str("SELLER_TOKEN")
     client_id = env.str("CLIENT_ID")
